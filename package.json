@@ -1,0 +1,13 @@
+{
+  "name": "cursor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "websocket": "^1.0.24"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Jakub Pachciarek"
+}

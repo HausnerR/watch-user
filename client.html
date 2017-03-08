@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+        <div id="window" style="width: 0; height: 0; margin: auto; border: 3px solid #000; position: relative;">
+            <div id="cursor" style="position: absolute; border: 1px solid #000; width: 4px; height: 4px; margin: -3px 0 0 -3px; background: #fff; border-radius: 100px;"></div>
+            <div id="inner" style="overflow: hidden; width: 100%; height: 100%;">
+                <img id="page" style="display: block; width: 100%;" />
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+        <script>
+        $(document).ready(function () {
+            var socket = new WebSocket("ws://127.0.0.1:8080/", "read-protocol");
+
+            var windowW = 500;
+            var w = 1, h = 1;
+
+            socket.onmessage = function(event) {
+                console.log(typeof event.data);
+                switch (typeof event.data) {
+                    case 'object':
+                        if (event.data instanceof Blob) {
+                            var urlCreator = window.URL || window.webkitURL;
+                            var imageUrl = urlCreator.createObjectURL(event.data);
+                            $('#page').attr('src', imageUrl);
+                        }
+                        break;
+
+                    case "string":
+                        var msg = JSON.parse(event.data);
+
+                        switch (msg.t) {
+                            case 'c':
+                                $('#cursor').css({
+                                    left: (msg.x / w * 100) + "%",
+                                    top: (msg.y / h * 100) + "%"
+                                });
+                                break;
+
+                            case 's':
+                                $('#inner')
+                                    .scrollLeft(windowW / w * msg.x)
+                                    .scrollTop(windowW / w * msg.y);
+                                break;
+
+                            case 'r':
+                                w = msg.w;
+                                h = msg.h;
+
+                                $("#window").css({
+                                    width: windowW,
+                                    height: windowW / w * h
+                                });
+                                break;
+                        }
+                        break;
+                }
+            };
+        });
+        </script>
+    </body>
+</html>
